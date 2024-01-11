@@ -1,5 +1,10 @@
-def handler(event, context):
-    return {
-        "statusCode": 200,
-        "body": "Hello World",
-    }
+from fastapi import FastAPI
+from mangum import Mangum
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"Hello": "Hello World from Todo API!"}
+
+handler = Mangum(app, lifespan="off")

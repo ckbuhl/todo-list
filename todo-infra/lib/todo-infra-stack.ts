@@ -23,13 +23,29 @@ export class TodoInfraStack extends cdk.Stack {
 
     // Create Lambda function for the API.
     const api = new lambda.Function(this, "API", {
+        // https://docs.aws.amazon.com/cdk/api/v1/docs/aws-lambda-readme.html#bundling-asset-code
+        code: lambda.Code.fromAsset("../api", {
+          bundling: {
+            image: lambda.Runtime.PYTHON_3_12.bundlingImage,
+            command: [
+              "bash",
+              "-c",
+              "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output",
+            ],
+          },
+        }),
         runtime: lambda.Runtime.PYTHON_3_12,
-        code: lambda.Code.fromAsset("../api"),
         handler: "todo.handler",
+        architecture: lambda.Architecture.ARM_64,
         environment: {
-            TABLE_NAME:table.tableName,
+          TABLE_NAME: table.tableName,
         },
-    });
+      });
+      table.grantReadWriteData(api);
+
+
+    // Give Lambda permissions to read/write to the table.
+    table.grantReadWriteData(api);
 
     // Create URL so we can access the functipon.
     const functionUrl = api.addFunctionUrl({
@@ -47,8 +63,6 @@ export class TodoInfraStack extends cdk.Stack {
         value: functionUrl.url,
     });
 
-    // Give Lambda permissions to read/write to the table.
-    table.grantReadWriteData(api);
-    
+
   }
 }
