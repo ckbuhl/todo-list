@@ -19,7 +19,9 @@ class PutTaskRequest(BaseModel):
     content: str | None = None
     user_id: str | None = None
     task_id: str | None = None
-    is_done: bool = False
+    tt1: int | None = None
+    is_done: bool | None = None
+    created_time: int | None = None
 
 
 @app.get("/")
